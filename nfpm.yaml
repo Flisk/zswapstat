@@ -1,0 +1,18 @@
+# see https://nfpm.goreleaser.com/configuration for detailed usage
+name: zswapstat
+arch: all
+platform: linux
+version: "0.1"
+section: utils
+priority: optional
+maintainer: "Flisk <self@flisk.xyz>"
+description: |
+  Utility script for viewing zswap statistics
+
+depends:
+  - perl
+  - bsdextrautils
+
+contents:
+  - src: ./zswapstat.pl
+    dst: /usr/sbin/zswapstat
