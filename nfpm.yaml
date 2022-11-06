@@ -2,7 +2,7 @@
 name: zswapstat
 arch: all
 platform: linux
-version: "0.1"
+version: "0.2"
 section: utils
 priority: optional
 maintainer: "Flisk <self@flisk.xyz>"
@@ -10,9 +10,8 @@ description: |
   Utility script for viewing zswap statistics
 
 depends:
-  - perl
-  - bsdextrautils
+  - python3
 
 contents:
-  - src: ./zswapstat.pl
+  - src: ./zswapstat.py
     dst: /usr/sbin/zswapstat
