@@ -57,9 +57,9 @@ def main():
         if not stored_pages and name == 'stored_pages':
             stored_pages = value
     
-    if not pool_total_size:
+    if pool_total_size is None:
         raise RuntimeError("missing required value: pool_total_size")
-    if not stored_pages:
+    if stored_pages is None:
         raise RuntimeError("missing required value: stored_pages")
 
     # sentinel value telling print_output to insert a line break
