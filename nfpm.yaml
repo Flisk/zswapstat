@@ -2,7 +2,7 @@
 name: zswapstat
 arch: all
 platform: linux
-version: "0.2"
+version: "0.3"
 section: utils
 priority: optional
 maintainer: "Flisk <self@flisk.xyz>"
