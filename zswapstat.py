@@ -15,6 +15,7 @@
 # OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 # PERFORMANCE OF THIS SOFTWARE.
 
+from typing import *
 import argparse
 import os
 import resource
@@ -27,8 +28,12 @@ UNITS_ARGS = ['b', 'k', 'm', 'g', 't', 'p', 'e', 'z', 'y']
 UNITS_IEC = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'GiB', 'TiB', 'EiB', 'ZiB', 'YiB']
 UNITS_SI = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
+# `None` OutputItem is used as a sentinel for a line break in print_output
+OutputItem = Optional[Tuple[str, str]]
+OutputList = List[OutputItem]
 
-def main():
+
+def main() -> None:
     args = parse_args()
 
     try:
@@ -40,17 +45,16 @@ def main():
         }.get(type(e))
         fail(f"couldn't chdir to {ZSWAP_DEBUG_DIR}: {e.strerror}", hint)
 
-    output = []
+    output: OutputList = []
     pool_total_size = None
     stored_pages = None
 
     for name in os.listdir(ZSWAP_DEBUG_DIR):
         with open(name) as f:
-            value = f.read()
-            value = value.strip()
-            value = int(value)
+            raw_value = f.read().strip()
+            value = int(raw_value)
         
-        output.append((name, value))
+        output.append((name, raw_value))
 
         if not pool_total_size and name == 'pool_total_size':
             pool_total_size = value
@@ -62,8 +66,8 @@ def main():
     if stored_pages is None:
         raise RuntimeError("missing required value: stored_pages")
 
-    # sentinel value telling print_output to insert a line break
-    output.append(('', None))
+    # line break between kernel values and derived values
+    output.append(None)
 
     stored_size = stored_pages * resource.getpagesize()
 
@@ -79,12 +83,12 @@ def main():
     else:
         savings = 0
 
-    output.append(('space_savings', savings))
+    output.append(('space_savings', str(savings)))
 
     print_output(output)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--block-size', '-B',
@@ -102,7 +106,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def convert_size(n, args):
+def convert_size(n: int, args: argparse.Namespace) -> str:
     exponent = UNITS_ARGS.index(args.block_size)
     value = n / args.size_base ** exponent
 
@@ -119,18 +123,18 @@ def convert_size(n, args):
     return f'{value} {unit}'
 
 
-def print_output(output):
-    max_field_len = max([len(name) for (name, _value) in output])
+def print_output(output: OutputList) -> None:
+    max_field_len = max([len(item[0]) for item in output if item is not None])
     row_format = f'{{:<{max_field_len}}}  {{:}}'
 
-    for (name, value) in output:
-        if name == '':
+    for item in output:
+        if item is None:
             print()
         else:
-            print(row_format.format(name, value))
+            print(row_format.format(item[0], item[1]))
 
 
-def fail(msg, hint=None):
+def fail(msg: str, hint: Optional[str] = None) -> NoReturn:
     print(f'fatal: {msg}', file=sys.stderr)
     if hint:
         print(hint, file=sys.stderr)
