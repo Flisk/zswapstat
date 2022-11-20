@@ -6,7 +6,7 @@ the [zswap Linux kernel module][1]. It outputs each field provided in
 
 ## Requirements
 
-A Python 3 interpreter.
+Python 3.9 or newer. Older versions may work, but have not been tested.
 
 ## Sample Output
 
